@@ -83,7 +83,7 @@ def apply_canny(image_path, limiar1=100, limiar2=200, apertureSize=3, L2gradient
         edges (np.ndarray): Imagem binária com as bordas detectadas.
     """
     imagem = read_image(image_path)
-    
+
     return cv2.Canny(imagem, limiar1, limiar2, apertureSize=apertureSize, L2gradient=L2gradient)
 
 # Caminho da imagem
