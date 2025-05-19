@@ -1,10 +1,7 @@
 import cv2
 import numpy as np
-
 import matplotlib.pyplot as plt
-
-# Carregar imagem em escala de cinza
-img_path = './images/mazda_rx7.jpg'
+import argparse
 
 def read_image(image_path):
     """
@@ -19,7 +16,6 @@ def read_image(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if image is None:
         raise ValueError(f"Imagem não encontrada: {image_path}")
-    
     return image
 
 def threshold_mean(image_path, block_size, C):
@@ -35,7 +31,6 @@ def threshold_mean(image_path, block_size, C):
         thresh_img (np.ndarray): Imagem binarizada pelo método da média local.
     """
     image = read_image(image_path)
-
     return cv2.adaptiveThreshold(
         image, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, block_size, C
     )
@@ -53,7 +48,6 @@ def threshold_gaussian(image_path, block_size, C):
         thresh_img (np.ndarray): Imagem binarizada pelo método gaussiano local.
     """
     image = read_image(image_path)
-
     return cv2.adaptiveThreshold(
         image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, C
     )
@@ -98,40 +92,51 @@ def region_growing(image_path, threshold=10):
 
     return region
 
-original_image = read_image(img_path)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Segmentação e thresholding em imagens.")
+    parser.add_argument(
+        "--image",
+        type=str,
+        default="./images/mazda_rx7.jpg",
+        help="Caminho para a imagem (padrão: ./images/mazda_rx7.jpg)"
+    )
+    args = parser.parse_args()
+    img_path = args.image
 
-# Aplicar thresholding adaptativo
-thresh_mean = threshold_mean(
-    img_path, block_size=11, C=2
-)  # Tamanho do bloco 11x11, subtrai 2 da média local
+    original_image = read_image(img_path)
 
-thresh_gauss = threshold_gaussian(
-    img_path, block_size=11, C=2
-)  # Tamanho do bloco 11x11, subtrai 2 da média ponderada gaussiana local
+    # Aplicar thresholding adaptativo
+    thresh_mean = threshold_mean(
+        img_path, block_size=11, C=2
+    )  # Tamanho do bloco 11x11, subtrai 2 da média local
 
-region_grown = region_growing(img_path, threshold=50)
+    thresh_gauss = threshold_gaussian(
+        img_path, block_size=11, C=2
+    )  # Tamanho do bloco 11x11, subtrai 2 da média ponderada gaussiana local
 
-# Exibir resultados
-plt.figure(figsize=(10, 4))
-plt.subplot(1, 4, 1)
-plt.title('Original')
-plt.imshow(original_image, cmap='gray')
-plt.axis('off')
+    region_grown = region_growing(img_path, threshold=50)
 
-plt.subplot(1, 4, 2)
-plt.title('Mean Threshold')
-plt.imshow(thresh_mean, cmap='gray')
-plt.axis('off')
+    # Exibir resultados
+    plt.figure(figsize=(10, 4))
+    plt.subplot(1, 4, 1)
+    plt.title('Original')
+    plt.imshow(original_image, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(1, 4, 3)
-plt.title('Gaussian Threshold')
-plt.imshow(thresh_gauss, cmap='gray')
-plt.axis('off')
+    plt.subplot(1, 4, 2)
+    plt.title('Mean Threshold')
+    plt.imshow(thresh_mean, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(1, 4, 4)
-plt.title('Region Growing')
-plt.imshow(region_grown, cmap='gray')
-plt.axis('off')
+    plt.subplot(1, 4, 3)
+    plt.title('Gaussian Threshold')
+    plt.imshow(thresh_gauss, cmap='gray')
+    plt.axis('off')
 
-plt.tight_layout()
-plt.show()
+    plt.subplot(1, 4, 4)
+    plt.title('Region Growing')
+    plt.imshow(region_grown, cmap='gray')
+    plt.axis('off')
+
+    plt.tight_layout()
+    plt.show()

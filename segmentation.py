@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 def read_image(image_path):
     """
@@ -15,7 +16,6 @@ def read_image(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if image is None:
         raise ValueError(f"Imagem não encontrada: {image_path}")
-    
     return image
 
 def apply_sobel(image_path, dx=1, dy=0, ksize=3):
@@ -38,7 +38,6 @@ def apply_sobel(image_path, dx=1, dy=0, ksize=3):
     sobely = cv2.Sobel(imagem, cv2.CV_64F, 0, dy, ksize=ksize)
     sobel_magnitude = np.sqrt(sobelx**2 + sobely**2)
     sobel_magnitude = np.uint8(np.clip(sobel_magnitude, 0, 255))
-
     return sobelx, sobely, sobel_magnitude
 
 def apply_prewitt(image_path, ddepth=-1):
@@ -65,7 +64,6 @@ def apply_prewitt(image_path, ddepth=-1):
     prewitty = cv2.filter2D(imagem, ddepth, kernel_prewitt_y)
     prewitt_magnitude = np.sqrt(prewittx.astype(np.float32)**2 + prewitty.astype(np.float32)**2)
     prewitt_magnitude = np.uint8(np.clip(prewitt_magnitude, 0, 255))
-
     return prewittx, prewitty, prewitt_magnitude
 
 def apply_canny(image_path, limiar1=100, limiar2=200, apertureSize=3, L2gradient=False):
@@ -83,59 +81,66 @@ def apply_canny(image_path, limiar1=100, limiar2=200, apertureSize=3, L2gradient
         edges (np.ndarray): Imagem binária com as bordas detectadas.
     """
     imagem = read_image(image_path)
-
     return cv2.Canny(imagem, limiar1, limiar2, apertureSize=apertureSize, L2gradient=L2gradient)
 
-# Caminho da imagem
-img_path = './images/mazda_rx7.jpg'
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Segmentação por detecção de bordas em imagens.")
+    parser.add_argument(
+        "--image",
+        type=str,
+        default="./images/mazda_rx7.jpg",
+        help="Caminho para a imagem (padrão: ./images/mazda_rx7.jpg)"
+    )
+    args = parser.parse_args()
+    img_path = args.image
 
-# Aplicar filtros
-sobelx, sobely, sobel_magnitude = apply_sobel(img_path, dx=1, dy=1, ksize=3)
-prewittx, prewitty, prewitt_magnitude = apply_prewitt(img_path, ddepth=-1)
-canny_edges = apply_canny(img_path, limiar1=100, limiar2=200, apertureSize=3, L2gradient=False)
+    # Aplicar filtros
+    sobelx, sobely, sobel_magnitude = apply_sobel(img_path, dx=1, dy=1, ksize=3)
+    prewittx, prewitty, prewitt_magnitude = apply_prewitt(img_path, ddepth=-1)
+    canny_edges = apply_canny(img_path, limiar1=100, limiar2=200, apertureSize=3, L2gradient=False)
 
-# Exibir resultados
-plt.figure(figsize=(16, 8))
+    # Exibir resultados
+    plt.figure(figsize=(16, 8))
 
-plt.subplot(2, 4, 1)
-plt.title('Original')
-plt.imshow(read_image(img_path), cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 1)
+    plt.title('Original')
+    plt.imshow(read_image(img_path), cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 2)
-plt.title('Sobel X')
-plt.imshow(np.abs(sobelx), cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 2)
+    plt.title('Sobel X')
+    plt.imshow(np.abs(sobelx), cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 3)
-plt.title('Sobel Y')
-plt.imshow(np.abs(sobely), cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 3)
+    plt.title('Sobel Y')
+    plt.imshow(np.abs(sobely), cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 4)
-plt.title('Sobel Magnitude')
-plt.imshow(sobel_magnitude, cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 4)
+    plt.title('Sobel Magnitude')
+    plt.imshow(sobel_magnitude, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 5)
-plt.title('Canny')
-plt.imshow(canny_edges, cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 5)
+    plt.title('Canny')
+    plt.imshow(canny_edges, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 6)
-plt.title('Prewitt X')
-plt.imshow(prewittx, cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 6)
+    plt.title('Prewitt X')
+    plt.imshow(prewittx, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 7)
-plt.title('Prewitt Y')
-plt.imshow(prewitty, cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 7)
+    plt.title('Prewitt Y')
+    plt.imshow(prewitty, cmap='gray')
+    plt.axis('off')
 
-plt.subplot(2, 4, 8)
-plt.title('Prewitt Magnitude')
-plt.imshow(prewitt_magnitude, cmap='gray')
-plt.axis('off')
+    plt.subplot(2, 4, 8)
+    plt.title('Prewitt Magnitude')
+    plt.imshow(prewitt_magnitude, cmap='gray')
+    plt.axis('off')
 
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
